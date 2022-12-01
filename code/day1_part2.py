@@ -1,15 +1,15 @@
-import pandas as pd
-import os
+import heapq
+
+sum_heap = []
 
 line_id = 0
 current_sum = 0
-largest_sum = -1
 
 with open("inputs/day1.txt", "r") as file:
     for line in file:
         if line == "\n":
-            # update largest
-            largest_sum = max(current_sum, largest_sum)
+            # update heap with negative sum
+            heapq.heappush(sum_heap, -current_sum)
             # reset current
             current_sum = 0
         else:
@@ -18,4 +18,9 @@ with open("inputs/day1.txt", "r") as file:
         
         line_id += 1
 
-print(largest_sum)
+# get sum of top 3
+result = 0
+for _ in range(3):
+    result += heapq.heappop(sum_heap)
+
+print(-result)
