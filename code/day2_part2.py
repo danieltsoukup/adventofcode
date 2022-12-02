@@ -1,30 +1,33 @@
-from collections import defaultdict
+import pandas as pd
+import numpy as np
 
-reply_to_score = {"X": 1, "Y": 2, "Z": 3}
+plays = ["A", "B", "C"]
+replies = ["X", "Y", "Z"]
+reply_to_score = dict(zip(replies, range(1, 4)))
 
-# we lose
-game_to_score = defaultdict(int) 
+# default score 0 - we lose
+game_to_score = pd.DataFrame(
+    index=plays,
+    columns=replies, 
+    data=np.zeros((len(plays), len(replies)), dtype=int)
+)
 
 # we draw
-for game in zip(["A", "B", "C"], ["X", "Y", "Z"]):
-    game_to_score[game] = 3 
+for play, reply in zip(plays, replies):
+    game_to_score.loc[play, reply] = 3 
 
 # we win
-for game in zip(["A", "B", "C"], ["Y", "Z", "X"]):
-    game_to_score[game] = 6 
-
-find_reply = dict()
-# TODO: finish conversion
+for play, reply in zip(["A", "B", "C"], ["Y", "Z", "X"]):
+    game_to_score.loc[play, reply] = 6 
 
 total_score = 0
 with open("inputs/day2.txt", "r") as file:
     for line in file:
         line = line.strip()
         if line:
-            play, result = line.split(" ")
-            reply = find_reply[(play, result)]
+            play, reply = line.split(" ")
 
             total_score += reply_to_score[reply]
-            total_score += game_to_score[(play, reply)]
+            total_score += game_to_score.loc[play, reply]
 
 print(total_score)
