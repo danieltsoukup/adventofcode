@@ -4,6 +4,7 @@ See here the official [Advent of Code 2022](https://adventofcode.com/2022) chall
 
 ### Day 2
 
+- Part 1/2: rock-paper-scissors game evaluation.
 
 ### Day 1
 
