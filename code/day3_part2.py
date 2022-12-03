@@ -10,6 +10,10 @@ line_id = 1
 
 
 def get_group_score(groups: List[str]) -> int:
+    """
+    Find the score for common letters in a list of strings.
+    Assumes 3 groups and a single commone letter.
+    """
     groups = [set(item) for item in groups]
     common_letters = list(groups[0].intersection(groups[1], groups[2]))
 
