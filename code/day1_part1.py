@@ -12,7 +12,7 @@ with open("inputs/day1.txt", "r") as file:
         else:
             # update current
             current_sum += int(line)
-        
+
         line_id += 1
 
 print(largest_sum)
