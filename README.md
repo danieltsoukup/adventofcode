@@ -2,7 +2,7 @@
 
 See here the official [Advent of Code 2022](https://adventofcode.com/2022) challenges.
 
-### Day 2
+### Day 3
 
 - Rucksack overlap 
     - Sets and intersections.
