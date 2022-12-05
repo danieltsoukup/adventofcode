@@ -4,12 +4,17 @@ See here the official [Advent of Code 2022](https://adventofcode.com/2022) chall
 
 ### Setup
 
-To use the `makefile` for setting up the daily challenge, first:
+To use the `makefile` for setting up the daily challenge, first: create a file called `sessionid` and add a single line with your session id - you can get this by inspecting the Advent of Code cookies in your browser.
 
-1. Create a file called `cookies` and add a single line `MYAOCSESSIONID="..."` with your session id - you can get this by inspecting the Advent of Code website.
-2. Run `source cookies` to save this environment variable.
+Run `make files day=X` to get the input for day X and create code files based on the template.
 
-Run `make files sessionid=$MYAOCSESSIONID day=X` to get the input for day X and create code files based on the template.
+Using pre-commit hooks:
+
+```
+pip install black
+pip install pre-commit
+pre-commit install
+```
 
 ### Day 4
 
