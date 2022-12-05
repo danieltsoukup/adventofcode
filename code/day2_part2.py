@@ -19,6 +19,7 @@ for play, reply in zip(plays, replies):
 for play, reply in zip(["A", "B", "C"], ["Y", "Z", "X"]):
     game_to_score.loc[play, reply] = 6
 
+
 def get_reply(play: str, score: int) -> str:
     """
     Find the right reply based on the play and score.
@@ -27,6 +28,7 @@ def get_reply(play: str, score: int) -> str:
     idx = np.argmax(play_row == score)
 
     return replies[idx]
+
 
 total_score = 0
 with open("inputs/day2.txt", "r") as file:
