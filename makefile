@@ -4,14 +4,16 @@ SESSIONID=`cat sessionid`
 
 # create files for the day
 files: inputs
-	echo "INPUT_FILE='inputs/day$(day).txt'" > "code/day$(day)_part1.py"
-	cat code/template >> "code/day$(day)_part1.py"
+	mkdir -p "$(year)/code"
+	echo "INPUT_FILE='$(year)/inputs/day$(day).txt'" > "$(year)/code/day$(day)_part1.py"
+	cat code/template >> "$(year)/code/day$(day)_part1.py"
 	
-	echo "INPUT_FILE='inputs/day$(day).txt'" > "code/day$(day)_part2.py" 
-	cat code/template >> "code/day$(day)_part2.py"
+	echo "INPUT_FILE='$(year)/inputs/day$(day).txt'" > "$(year)/code/day$(day)_part2.py" 
+	cat code/template >> "$(year)/code/day$(day)_part2.py"
 
 inputs:
-	curl --cookie session="$(SESSIONID)" "https://adventofcode.com/2022/day/$(day)/input" > "inputs/day$(day).txt"
+	mkdir -p "$(year)/inputs"
+	curl --cookie session="$(SESSIONID)" "https://adventofcode.com/$(year)/day/$(day)/input" > "$(year)/inputs/day$(day).txt"
 
 # add new code and inputs to git
 add:
