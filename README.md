@@ -16,6 +16,16 @@ pip install pre-commit
 pre-commit install
 ```
 
+## Advent of Code 2022
+
+### Day 6
+
+- First occurrence of unique characters.
+
+### Day 5
+
+- Reorganizing stacks.
+
 ### Day 4
 
 - Interval overlap - compare endpoints.

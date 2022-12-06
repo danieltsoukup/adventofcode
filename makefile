@@ -6,10 +6,10 @@ SESSIONID=`cat sessionid`
 files: inputs
 	mkdir -p "$(year)/code"
 	echo "INPUT_FILE='$(year)/inputs/day$(day).txt'" > "$(year)/code/day$(day)_part1.py"
-	cat code/template >> "$(year)/code/day$(day)_part1.py"
+	cat template >> "$(year)/code/day$(day)_part1.py"
 	
 	echo "INPUT_FILE='$(year)/inputs/day$(day).txt'" > "$(year)/code/day$(day)_part2.py" 
-	cat code/template >> "$(year)/code/day$(day)_part2.py"
+	cat template >> "$(year)/code/day$(day)_part2.py"
 
 inputs:
 	mkdir -p "$(year)/inputs"
@@ -17,4 +17,4 @@ inputs:
 
 # add new code and inputs to git
 add:
-	git add code/* inputs/*
+	git add $(year)/code/* $(year)/inputs/*
