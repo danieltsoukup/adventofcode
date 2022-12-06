@@ -1,4 +1,4 @@
-# Advent of Code 2022
+# Advent of Code
 
 See here the official [Advent of Code 2022](https://adventofcode.com/2022) challenges.
 
@@ -6,7 +6,7 @@ See here the official [Advent of Code 2022](https://adventofcode.com/2022) chall
 
 To use the `makefile` for setting up the daily challenge, first: create a file called `sessionid` and add a single line with your session id - you can get this by inspecting the Advent of Code cookies in your browser.
 
-Run `make files day=X` to get the input for day X and create code files based on the template.
+Run `make files year=X day=Y` to get the input for year X, day Y and create code files based on the template.
 
 Using pre-commit hooks:
 
