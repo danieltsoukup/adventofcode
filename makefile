@@ -1,4 +1,4 @@
-.PHONY: files add inputs
+.PHONY: files add inputs test
 
 SESSIONID=`cat sessionid`
 
@@ -18,3 +18,6 @@ inputs:
 # add new code and inputs to git
 add:
 	git add $(year)/code/* $(year)/inputs/*
+
+test:
+	pytest -s $(year)/code/test.py
