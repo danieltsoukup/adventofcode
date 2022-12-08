@@ -1,46 +1,12 @@
-from collections import defaultdict
-from typing import Any
+from utils import Dir
 
 
 INPUT_FILE = "2022/inputs/day7.txt"
 
-# Partly based on
-# https://stackoverflow.com/questions/3009935/looking-for-a-good-python-tree-data-structure
-class Dir(defaultdict):
+
+class DirSolver(Dir):
     def __init__(self, parent):
-        super().__init__(self)
-        self.parent = parent
-        self.size = None
-
-    def __call__(self):
-        return Dir(self)
-
-    def get_files(self):
-        """
-        Depth-First generator over files.
-        """
-        for child in self:
-            if isinstance(self[child], Dir):
-                for file in self[child].get_files():
-                    yield file
-            else:
-                yield self[child]
-
-    def get_size(self):
-        """
-        Get total size.
-        """
-        if self.size is None:
-            total = 0
-            for child in self:
-                if isinstance(self[child], Dir):
-                    total += self[child].get_size()
-                else:
-                    total += self[child]
-
-            self.size = total
-
-        return self.size
+        super().__init__(parent)
 
     def get_answer(self):
         """
@@ -60,7 +26,7 @@ class Dir(defaultdict):
 
 
 with open(INPUT_FILE, "r") as file:
-    current_working_dir = Dir(None)
+    current_working_dir = DirSolver(None)
 
     for line in file:
         line = line.strip()

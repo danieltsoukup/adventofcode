@@ -1,4 +1,5 @@
-from day7_part1 import Dir
+from utils import Dir
+from day7_part1 import DirSolver
 from pytest import fixture
 
 
@@ -45,7 +46,7 @@ def tree2() -> Dir:
     return t
 
 
-def test_answer(tree2: Dir):
+def test_answer(tree2: DirSolver):
 
     assert tree2.get_answer() == 10
 
