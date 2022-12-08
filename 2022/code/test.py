@@ -1,6 +1,7 @@
 from utils import Dir
 from day7_part1 import DirSolver
 from pytest import fixture
+from day8_part1 import solver
 
 
 @fixture()
@@ -36,8 +37,8 @@ def test_get_size(tree: Dir):
 
 
 @fixture()
-def tree2() -> Dir:
-    t = Dir("/")
+def tree2() -> DirSolver:
+    t = DirSolver("/")
     t["file1"] = 1
     t["dir1"]["dir11"]["file2"] = 2
     t["dir1"]["dir12"]["file2"] = 3
@@ -53,3 +54,16 @@ def test_answer(tree2: DirSolver):
 
 def test_empty_subdir(tree: Dir):
     assert isinstance(tree["new_dir"], Dir)
+
+
+@fixture
+def dummy_grid():
+    return [
+        "1231",  # 4 visible from top
+        "2141",  # 1 from left, 1 from top, 1 from right
+        "1112",  # 4 from bottom
+    ]
+
+
+def test_visible(dummy_grid):
+    assert solver(dummy_grid) == 11
