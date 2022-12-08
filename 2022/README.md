@@ -4,7 +4,6 @@ The official [Advent of Code 2022](https://adventofcode.com/2022) challenges.
 
 - Day 7 
     - Building a tree and searching - recursive tree search, BFS & DFS.
-
 - Day 6
     - First occurrence of unique characters.
 - Day 5
