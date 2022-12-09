@@ -1,4 +1,5 @@
 from collections import defaultdict
+from utils import read_inputs
 
 INPUT_FILE = "2022/inputs/day8.txt"
 
@@ -48,10 +49,6 @@ def solver(inputs: list[str]) -> int:
 
 if __name__ == "__main__":
     # read inputs
-    inputs = []
-    with open(INPUT_FILE, "r") as file:
-        for line in file:
-            line = line.strip()
-            inputs.append(line)
+    inputs = read_inputs(INPUT_FILE)
 
     print(solver(inputs))

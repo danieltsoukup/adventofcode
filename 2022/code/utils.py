@@ -2,6 +2,16 @@ from collections import defaultdict
 from typing import Any
 
 
+def read_inputs(path: str) -> list[str]:
+    inputs = []
+    with open(path, "r") as file:
+        for line in file:
+            line = line.strip()
+            inputs.append(line)
+
+    return inputs
+
+
 # Partly based on
 # https://stackoverflow.com/questions/3009935/looking-for-a-good-python-tree-data-structure
 class Dir(defaultdict):

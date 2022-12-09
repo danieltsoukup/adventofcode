@@ -65,5 +65,5 @@ def dummy_grid():
     ]
 
 
-def test_visible(dummy_grid):
+def test_solver(dummy_grid):
     assert solver(dummy_grid) == 11

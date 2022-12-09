@@ -2,6 +2,9 @@
 
 The official [Advent of Code 2022](https://adventofcode.com/2022) challenges.
 
+- Day 8
+    - Walking a grid of numbers - DP tricks.
+
 - Day 7 
     - Building a tree and searching - recursive tree search with caching, BFS & DFS.
 - Day 6
