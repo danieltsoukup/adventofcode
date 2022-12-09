@@ -1,7 +1,9 @@
 from utils import Dir
 from day7_part1 import DirSolver
 from pytest import fixture
+import pytest
 from day8_part1 import solver
+from day9_part1 import adjust_tail
 
 
 @fixture()
@@ -67,3 +69,44 @@ def dummy_grid():
 
 def test_solver(dummy_grid):
     assert solver(dummy_grid) == 11
+
+
+test_data_inplace = [
+    ((1, 0), (0, 0)),
+    ((1, 1), (0, 0)),
+    ((1, -1), (0, -1)),
+    ((-1, -1), (0, -1)),
+    ((-1, -1), (0, 0)),
+]
+
+
+@pytest.mark.parametrize("head,tail", test_data_inplace)
+def test_adjust_tail_inplace(head, tail):
+
+    assert tail == adjust_tail(head, tail)
+
+
+test_data_on_axis = [
+    ((2, 0), (0, 0), (1, 0)),
+    ((0, -2), (0, 0), (0, -1)),
+    ((-1, -5), (-1, -2), (-1, -4)),
+]
+
+
+@pytest.mark.parametrize("head,tail,expected", test_data_on_axis)
+def test_adjust_tail_on_axis(head, tail, expected):
+
+    assert expected == adjust_tail(head, tail)
+
+
+test_data_diag = [
+    ((-3, -2), (0, -1), (-2, -2)),
+    ((1, 5), (0, 0), (1, 4)),
+    ((-3, 1), (0, 0), (-2, 1)),
+]
+
+
+@pytest.mark.parametrize("head,tail,expected", test_data_diag)
+def test_adjust_tail_diag(head, tail, expected):
+
+    assert expected == adjust_tail(head, tail)
