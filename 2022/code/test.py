@@ -1,12 +1,12 @@
 from utils import Dir
 from day7_part1 import DirSolver
-from pytest import fixture
 import pytest
 from day8_part1 import solver
-from day9_part1 import adjust_tail
+from utils import adjust_tail
+from day9_part2 import Rope
 
 
-@fixture()
+@pytest.fixture()
 def tree() -> Dir:
     t = Dir("/")
     t["file1"] = 1
@@ -38,7 +38,7 @@ def test_get_size(tree: Dir):
     assert tree.get_size() == 3 and tree["dir1"].size == 2
 
 
-@fixture()
+@pytest.fixture()
 def tree2() -> DirSolver:
     t = DirSolver("/")
     t["file1"] = 1
@@ -58,7 +58,7 @@ def test_empty_subdir(tree: Dir):
     assert isinstance(tree["new_dir"], Dir)
 
 
-@fixture
+@pytest.fixture
 def dummy_grid():
     return [
         "1231",  # 4 visible from top
@@ -110,3 +110,10 @@ test_data_diag = [
 def test_adjust_tail_diag(head, tail, expected):
 
     assert expected == adjust_tail(head, tail)
+
+
+def test_rope():
+    rope = Rope()
+    rope.head = (1, 0)
+
+    assert rope.points[0] == rope.head
