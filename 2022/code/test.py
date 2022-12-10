@@ -4,6 +4,7 @@ import pytest
 from day8_part1 import solver
 from utils import adjust_tail
 from day9_part2 import Rope
+from day10_part2 import cycle_to_position
 
 
 @pytest.fixture()
@@ -117,3 +118,13 @@ def test_rope():
     rope.head = (1, 0)
 
     assert rope.points[0] == rope.head
+
+
+test_cycles = [(1, 0, 0), (40, 0, 39), (41, 1, 0)]
+
+
+@pytest.mark.parametrize("cycle,expected_row,expected_col", test_cycles)
+def test_cycle_pos(cycle, expected_row, expected_col):
+    row, col = cycle_to_position(cycle)
+
+    assert (row == expected_row) and (col == expected_col)
