@@ -5,6 +5,7 @@ from day8_part1 import solver
 from utils import adjust_tail
 from day9_part2 import Rope
 from day10_part2 import cycle_to_position
+from day11_part1 import operation_factory
 
 
 @pytest.fixture()
@@ -128,3 +129,9 @@ def test_cycle_pos(cycle, expected_row, expected_col):
     row, col = cycle_to_position(cycle)
 
     assert (row == expected_row) and (col == expected_col)
+
+
+def test_op_factory():
+    op = operation_factory("new = old + 3")
+
+    assert op(3) == 6
