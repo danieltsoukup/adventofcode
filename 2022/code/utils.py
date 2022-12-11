@@ -14,6 +14,10 @@ def read_inputs(path: str) -> list[str]:
     return inputs
 
 
+#############
+### DAY 7 ###
+#############
+
 # Partly based on
 # https://stackoverflow.com/questions/3009935/looking-for-a-good-python-tree-data-structure
 class Dir(defaultdict):
@@ -61,6 +65,11 @@ class Dir(defaultdict):
             self.size = total
 
         return self.size
+
+
+#############
+### DAY 9 ###
+#############
 
 
 def move(head: tuple[int], direction: str, num_steps: int) -> tuple[int]:
