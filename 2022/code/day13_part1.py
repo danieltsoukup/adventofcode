@@ -1,11 +1,14 @@
 INPUT_FILE = "2022/inputs/day13.txt"
 
 
-def compare_packets(left, right) -> bool:
+def compare_packets(left: list, right: list) -> bool:
+    # at least one list empty
     if len(left) == 0 and len(right) > 0:
         return True
+
     elif len(right) == 0 and len(left) > 0:
         return False
+
     elif len(right) == 0 and len(left) == 0:
         return None
 
@@ -18,9 +21,12 @@ def compare_packets(left, right) -> bool:
 
     # both list
     elif isinstance(left[0], list) and isinstance(right[0], list):
+        # recursive call
         sub_result = compare_packets(left[0], right[0])
+        # recursive unsuccessful in comparison - move on with the rest of the list
         if sub_result is None:
             return compare_packets(left[1:], right[1:])
+        # recursive call successful
         else:
             return sub_result
 
@@ -35,7 +41,7 @@ def compare_packets(left, right) -> bool:
 if __name__ == "__main__":
     line_id = 0
     total = 0
-
+    decisions = []
     with open(INPUT_FILE, "r") as file:
         for line in file:
             if line_id % 3 == 0:
@@ -44,7 +50,9 @@ if __name__ == "__main__":
             elif line_id % 3 == 1:
                 right = eval(line.strip())
 
-                if compare_packets(left, right):
+                decision = compare_packets(left, right)
+                decisions.append(decision)
+                if decision:
                     print(line_id // 3 + 1)
                     total += line_id // 3 + 1
                 else:
@@ -54,4 +62,4 @@ if __name__ == "__main__":
 
             line_id += 1
 
-    print(total)
+    print(total, sum(decisions), sum([not i for i in decisions]))
