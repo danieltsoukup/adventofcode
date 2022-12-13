@@ -1,3 +1,4 @@
+INPUT_FILE = "2022/inputs/day13.txt"
 
 
 if __name__ == "__main__":
