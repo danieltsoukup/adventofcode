@@ -5,7 +5,8 @@ from day8_part1 import solver
 from utils import adjust_tail
 from day9_part2 import Rope
 from day10_part2 import cycle_to_position
-from day11_part1 import operation_factory
+from utils import operation_factory
+from day12_part1 import condition
 
 
 @pytest.fixture()
@@ -135,3 +136,21 @@ def test_op_factory():
     op = operation_factory("new = old + 3")
 
     assert op(3) == 6
+
+
+##############
+### DAY 12 ###
+##############
+
+
+@pytest.fixture
+def grid():
+    return [["a", "b"], ["c", "d"]]
+
+
+def test_condition_true(grid):
+    assert condition((0, 0), (0, 1), grid)
+
+
+def test_condition_false(grid):
+    assert not condition((0, 0), (1, 0), grid)
