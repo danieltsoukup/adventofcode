@@ -45,6 +45,13 @@ if __name__ == "__main__":
                 right = eval(line.strip())
 
                 if compare_packets(left, right):
+                    print(line_id // 3 + 1)
                     total += line_id // 3 + 1
+                else:
+                    print("not", line_id // 3 + 1)
+            else:
+                pass
 
             line_id += 1
+
+    print(total)

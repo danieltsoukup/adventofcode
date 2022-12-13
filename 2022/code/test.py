@@ -1,4 +1,4 @@
-from utils import Dir
+from day7_part1 import Dir
 from day7_part1 import DirSolver
 import pytest
 from day8_part1 import solver
@@ -7,6 +7,7 @@ from day9_part2 import Rope
 from day10_part2 import cycle_to_position
 from day11_part1 import operation_factory
 from day12_part1 import condition
+from day13_part1 import compare_packets
 
 
 @pytest.fixture()
@@ -154,3 +155,21 @@ def test_condition_true(grid):
 
 def test_condition_false(grid):
     assert not condition((0, 0), (1, 0), grid)
+
+
+test_packets = [
+    ([1, 1, 3, 1, 1], [1, 1, 5, 1, 1], True),
+    ([[1], [2, 3, 4]], [[1], 4], True),
+    ([9], [[8, 7, 6]], False),
+    ([[4, 4], 4, 4], [[4, 4], 4, 4, 4], True),
+    ([7, 7, 7, 7], [7, 7, 7], False),
+    ([], [3], True),
+    ([[[]]], [[]], False),
+    ([1, [2, [3, [4, [5, 6, 7]]]], 8, 9], [1, [2, [3, [4, [5, 6, 0]]]], 8, 9], False),
+]
+
+
+@pytest.mark.parametrize("left,right,expected", test_packets)
+def test_compare_packets(left, right, expected):
+
+    assert compare_packets(left, right) == expected
