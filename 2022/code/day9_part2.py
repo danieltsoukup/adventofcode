@@ -1,4 +1,4 @@
-from utils import move, adjust_tail
+from day9_part1 import move, adjust_tail
 
 INPUT_FILE = "2022/inputs/day9.txt"
 

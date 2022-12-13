@@ -1,4 +1,4 @@
-from utils import Monkey, MonkeyConfig, parse_monkey_inputs, get_monkey_result
+from day11_part1 import Monkey, MonkeyConfig, parse_monkey_inputs, get_monkey_result
 
 
 INPUT_FILE = "2022/inputs/day11.txt"

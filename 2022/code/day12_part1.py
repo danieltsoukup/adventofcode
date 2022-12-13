@@ -1,7 +1,6 @@
 import networkx as nx
 from utils import read_inputs
 
-
 INPUT_FILE = "2022/inputs/day12.txt"
 
 

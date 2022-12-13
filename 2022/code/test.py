@@ -2,10 +2,10 @@ from utils import Dir
 from day7_part1 import DirSolver
 import pytest
 from day8_part1 import solver
-from utils import adjust_tail
+from day9_part1 import adjust_tail
 from day9_part2 import Rope
 from day10_part2 import cycle_to_position
-from utils import operation_factory
+from day11_part1 import operation_factory
 from day12_part1 import condition
 
 
