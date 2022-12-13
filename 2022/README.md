@@ -2,6 +2,14 @@
 
 The official [Advent of Code 2022](https://adventofcode.com/2022) challenges.
 
+- Day 12
+    - Shortest path - Dijkstra with `networkx`.
+- Day 11
+    - Monkey business - trick: avoid working with large numbers by storing only modulo a set of fixed values.
+- Day 10
+    - Oldschool printer
+- Day 9
+    - Playing snake :)
 - Day 8
     - Walking a grid of numbers - DP tricks.
 - Day 7 
