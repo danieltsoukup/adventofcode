@@ -1,3 +1,5 @@
+from ast import literal_eval
+
 INPUT_FILE = "2022/inputs/day13.txt"
 
 
@@ -47,26 +49,19 @@ def compare_packets(left: list, right: list) -> bool:
 if __name__ == "__main__":
     line_id = 0
     total = 0
-    decisions = []
     with open(INPUT_FILE, "r") as file:
         for line in file:
             if line_id % 3 == 0:
-                left = eval(line.strip())
+                left = literal_eval(line.strip())
 
             elif line_id % 3 == 1:
-                right = eval(line.strip())
+                right = literal_eval(line.strip())
 
-                decision = compare_packets(left, right)
-                decisions.append(decision)
-
-                if decision:
-                    print("----------", line_id // 3 + 1)
+                if compare_packets(left, right):
                     total += line_id // 3 + 1
-                else:
-                    print("not", line_id // 3 + 1)
             else:
                 pass
 
             line_id += 1
 
-    print(total, sum(decisions), sum([not i for i in decisions]))
+    print(total)

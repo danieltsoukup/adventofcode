@@ -1,5 +1,6 @@
 from day13_part1 import compare_packets
 from functools import cmp_to_key
+from ast import literal_eval
 
 INPUT_FILE = "2022/inputs/day13.txt"
 
@@ -19,7 +20,7 @@ if __name__ == "__main__":
         for line in file:
             line = line.strip()
             if line:
-                all_inputs.append(eval(line))
+                all_inputs.append(literal_eval(line))
 
     all_inputs = sorted(all_inputs, key=cmp_to_key(comparison_function))
 
