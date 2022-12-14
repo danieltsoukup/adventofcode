@@ -8,6 +8,8 @@ from day10_part2 import cycle_to_position
 from day11_part1 import operation_factory
 from day12_part1 import condition
 from day13_part1 import compare_packets
+import re
+from day14_part1 import get_line_segment
 
 
 @pytest.fixture()
@@ -186,3 +188,28 @@ def test_eval():
     string_list = "[1,[2,[3,[4,[5,6,7]]]],8,9]"
 
     assert eval(string_list) == [1, [2, [3, [4, [5, 6, 7]]]], 8, 9]
+
+
+def test_regex_for_rocks():
+    string_ = "502,34 -> 502,33 -> 502,34"
+
+    tuples = re.findall(r"(\d+),(\d+)", string_)
+    tuples = [(int(x), int(y)) for x, y in tuples]
+
+    assert tuples == [(502, 34), (502, 33), (502, 34)]
+
+
+def test_line_segment():
+    point1 = (0, -1)
+    point2 = (0, 1)
+    points = get_line_segment(point1, point2)
+
+    assert points == {(0, -1), (0, 0), (0, 1)}
+
+
+def test_line_segment2():
+    point1 = (2, -1)
+    point2 = (5, -1)
+    points = get_line_segment(point1, point2)
+
+    assert points == {(2, -1), (3, -1), (4, -1), (5, -1)}
