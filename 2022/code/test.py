@@ -159,15 +159,20 @@ def test_condition_false(grid):
 
 test_packets = [
     ([1, 1, 3, 1, 1], [1, 1, 5, 1, 1], True),
+    ([1, 1, 5, 1, 1], [1, 1, 3, 1, 1], False),
     ([[1], [2, 3, 4]], [[1], 4], True),
+    ([[1], 4], [[1], [2, 3, 4]], False),
     ([9], [[8, 7, 6]], False),
     ([[4, 4], 4, 4], [[4, 4], 4, 4, 4], True),
     ([7, 7, 7, 7], [7, 7, 7], False),
+    ([7, 7], [7, 7, 7], True),
     ([], [3], True),
     ([[[]]], [[]], False),
     ([1, [2, [3, [4, [5, 6, 7]]]], 8, 9], [1, [2, [3, [4, [5, 6, 0]]]], 8, 9], False),
     ([1, 2, 3], [1, 2, 3], None),
     ([[[]]], [[[]]], None),
+    ([], [], None),
+    ([5, 3], [[5], 4], True),
 ]
 
 
@@ -175,3 +180,9 @@ test_packets = [
 def test_compare_packets(left, right, expected):
 
     assert compare_packets(left, right) == expected
+
+
+def test_eval():
+    string_list = "[1,[2,[3,[4,[5,6,7]]]],8,9]"
+
+    assert eval(string_list) == [1, [2, [3, [4, [5, 6, 7]]]], 8, 9]
