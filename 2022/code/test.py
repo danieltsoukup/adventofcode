@@ -10,6 +10,7 @@ from day12_part1 import condition
 from day13_part1 import compare_packets
 import re
 from day14_part1 import get_line_segment
+from day15_part1 import find_overlap_interval
 
 
 @pytest.fixture()
@@ -213,3 +214,18 @@ def test_line_segment2():
     points = get_line_segment(point1, point2)
 
     assert points == {(2, -1), (3, -1), (4, -1), (5, -1)}
+
+
+def test_parse_coords():
+    string_ = "Sensor at x=-12, y=23: closest beacon is at x=45, y=-67"
+    expected = [("-12", "23"), ("45", "-67")]
+
+    assert expected == re.findall(r"x=(-?\d+), y=(-?\d+)", string_)
+
+
+def test_overlap():
+    height = 10
+    point = (8, 7)
+    distance = 9
+
+    assert (2, 14) == find_overlap_interval(point, distance, height)
