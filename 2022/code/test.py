@@ -10,7 +10,7 @@ from day12_part1 import condition
 from day13_part1 import compare_packets
 import re
 from day14_part1 import get_line_segment
-from day15_part1 import find_overlap_interval
+from day15_part1 import find_overlap_interval, interval_union_size
 
 
 @pytest.fixture()
@@ -223,9 +223,52 @@ def test_parse_coords():
     assert expected == re.findall(r"x=(-?\d+), y=(-?\d+)", string_)
 
 
+### DAY 15 ###
+
+
 def test_overlap():
     height = 10
     point = (8, 7)
     distance = 9
 
     assert (2, 14) == find_overlap_interval(point, distance, height)
+
+
+def test_overlap_edge():
+    height = 1
+    point = (0, 0)
+    distance = 1
+
+    assert (0, 0) == find_overlap_interval(point, distance, height)
+
+
+def test_overlap_edge2():
+    height = 1
+    point = (0, 0)
+    distance = 2
+
+    assert (-1, 1) == find_overlap_interval(point, distance, height)
+
+
+def test_no_overlap():
+    height = 2
+    point = (0, 0)
+    distance = 1
+
+    assert None is find_overlap_interval(point, distance, height)
+
+
+intervals = [
+    ([(1, 1)], 1),
+    ([(1, 2), (3, 4)], 4),
+    ([(1, 2), (2, 3)], 3),
+    ([(1, 2), (1, 4)], 4),
+    ([(1, 4), (2, 5)], 5),
+    ([(1, 5), (-5, 10)], 16),
+    ([(1, 2), (2, 3), (-7, -5), (-8, -6)], 7),
+]
+
+
+@pytest.mark.parametrize("intervals,expected", intervals)
+def test_interval_union_size(intervals, expected):
+    assert interval_union_size(intervals) == expected
