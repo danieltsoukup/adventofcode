@@ -272,3 +272,10 @@ intervals = [
 @pytest.mark.parametrize("intervals,expected", intervals)
 def test_interval_union_size(intervals, expected):
     assert interval_union_size(intervals) == expected
+
+
+def test_extract_nodes():
+    string_ = "Valve XN has flow rate=7; tunnels lead to valves DG, UJ, VD, VI, OU"
+    expected = ["DG", "UJ", "VD", "VI", "OU"]
+
+    assert expected == re.findall(r"([A-Z]+\b)+", string_)
