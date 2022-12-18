@@ -1,13 +1,8 @@
-import networkx as nx
 import re
-from itertools import chain, combinations
+import networkx as nx
 from functools import cache
 
-
-def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+INPUT_FILE = "2022/inputs/day16.txt"
 
 
 @cache
@@ -26,9 +21,6 @@ def recursive_optimizer(start_node: str, other_valves: tuple[str], steps: int):
             options.append(0)
 
     return max(options)
-
-
-INPUT_FILE = "2022/inputs/day16.txt"
 
 
 if __name__ == "__main__":
@@ -54,13 +46,5 @@ if __name__ == "__main__":
     start_node = "AA"
     valve_nodes = tuple([node for node in flow if flow[node] > 0])
 
-    result = -1
-    for subset in powerset(valve_nodes):
-        complement = (v for v in valve_nodes if v not in subset)
-        result = max(
-            result,
-            recursive_optimizer(start_node, subset, 26)
-            + recursive_optimizer(start_node, complement, 26),
-        )
-
+    result = recursive_optimizer(start_node, valve_nodes, 30)
     print(result)
