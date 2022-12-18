@@ -11,9 +11,6 @@ from day13_part1 import compare_packets
 import re
 from day14_part1 import get_line_segment
 from day15_part1 import find_overlap_interval, interval_union_size
-import networkx as nx
-import matplotlib.pyplot as plt
-from day16_part1 import graph_to_flow_digraph, optimize_flow
 
 
 @pytest.fixture()
@@ -287,19 +284,3 @@ def test_extract_nodes():
     expected = ["XN", "DG", "UJ", "VD", "VI", "OU"]
 
     assert expected == re.findall(r"([A-Z]+\b)+", string_)
-
-
-def test_optimizer():
-    graph = nx.Graph()
-    graph.add_node("a")
-    graph.nodes["a"]["flow"] = 1
-    graph.add_node("b")
-    graph.nodes["b"]["flow"] = 0
-    graph.add_edge("a", "b")
-
-    digraph = graph_to_flow_digraph(graph)
-
-    # nx.draw(digraph, labels={node: node + " " + str(digraph.nodes[node]["flow"]) for node in digraph.nodes})
-    # plt.show()
-
-    assert optimize_flow(digraph, "a", 20) == 19

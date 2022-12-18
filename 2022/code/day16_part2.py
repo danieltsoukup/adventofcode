@@ -2,12 +2,13 @@ import networkx as nx
 import re
 from itertools import chain, combinations
 from functools import cache
+from tqdm import tqdm
 
 
 def powerset(iterable):
-    "powerset([1,2,3]) --> () (1,) (2,) (3,) (1,2) (1,3) (2,3) (1,2,3)"
+    "powerset([1,2,3]) --> (1,) (2,) (3,) (1,2) (1,3) (2,3)"
     s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
 
 
 @cache
@@ -15,15 +16,16 @@ def recursive_optimizer(start_node: str, other_valves: tuple[str], steps: int):
     options = [0]
     for valve in other_valves:
         path_length = lengths[start_node][valve]
-        remaining_steps = steps - path_length - 1  # extra for opening
+        remaining_steps = steps - path_length - 1  # go to valve and open
         rest_of_valves = tuple([v for v in other_valves if v != valve])
-        if remaining_steps > 0:  # only consider if time left to release
+
+        if remaining_steps >= 0:  # only consider if time left to release
             options.append(
-                remaining_steps * flow[valve]
-                + recursive_optimizer(valve, rest_of_valves, remaining_steps)
+                remaining_steps * flow[valve]  # release
+                + recursive_optimizer(
+                    valve, rest_of_valves, remaining_steps
+                )  # continue
             )
-        else:
-            options.append(0)
 
     return max(options)
 
@@ -54,13 +56,13 @@ if __name__ == "__main__":
     start_node = "AA"
     valve_nodes = tuple([node for node in flow if flow[node] > 0])
 
-    result = -1
-    for subset in powerset(valve_nodes):
-        complement = (v for v in valve_nodes if v not in subset)
-        result = max(
-            result,
+    results = []
+    for subset in tqdm(powerset(valve_nodes)):
+        complement = tuple([v for v in valve_nodes if v not in subset])
+
+        results.append(
             recursive_optimizer(start_node, subset, 26)
             + recursive_optimizer(start_node, complement, 26),
         )
 
-    print(result)
+    print(max(results))
