@@ -14,7 +14,7 @@ ROBOT_COL = 1
 
 
 def setup_empty_array():
-    return np.zeros((4, 2), dtype=np.int16)
+    return np.zeros((3, 2), dtype=np.int16)
 
 
 def mine(board: np.ndarray) -> np.ndarray:
@@ -29,7 +29,7 @@ def board_to_string(board: np.ndarray) -> str:
 
 
 def board_from_string(board_string: str) -> np.ndarray:
-    return np.array(eval(board_string), dtype=np.int16).reshape(4, 2)
+    return np.array(eval(board_string), dtype=np.int16).reshape(3, 2)
 
 
 @cache
@@ -37,7 +37,7 @@ def recursive_miner(board_string: str, steps: int) -> int:
     board = board_from_string(board_string)
 
     if steps == 0:
-        return board[GEODE_ROW, RESOURCE_COL]
+        return 0
     else:
         options = []
         # just mine
@@ -51,7 +51,15 @@ def recursive_miner(board_string: str, steps: int) -> int:
                 new_board = mine(board)
                 # build
                 new_board = new_board + blueprint[robot]
-                options.append(recursive_miner(board_to_string(new_board), steps - 1))
+                if robot == "geode":  # future mining of currently built robot
+                    options.append(
+                        (steps - 1)
+                        + recursive_miner(board_to_string(new_board), steps - 1)
+                    )
+                else:
+                    options.append(
+                        recursive_miner(board_to_string(new_board), steps - 1)
+                    )
 
         return max(options)
 
@@ -81,7 +89,7 @@ if __name__ == "__main__":
             obs_array[CLAY_ROW, RESOURCE_COL] = -1 * int(clay_cost)
 
             geode_array = setup_empty_array()
-            geode_array[GEODE_ROW, ROBOT_COL] = 1
+            # geode_array[GEODE_ROW, ROBOT_COL] = 1
             ore_cost, obs_cost = re.findall(
                 r"geode robot costs (\d+) ore and (\d+) obsidian", line
             )[0]
@@ -97,10 +105,10 @@ if __name__ == "__main__":
                 }
             )
 
-    starter_board = np.zeros((4, 2), dtype=np.int16)
+    starter_board = setup_empty_array()
     starter_board[ORE_ROW, ROBOT_COL] = 1
 
-    STEPS = 19
+    STEPS = 24
 
     blueprint = blueprints[0]
 
