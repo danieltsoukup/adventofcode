@@ -17,9 +17,11 @@ def setup_empty_array():
     return np.zeros((3, 2), dtype=np.int16)
 
 
-def mine(board: np.ndarray) -> np.ndarray:
+def mine(board: np.ndarray, times: int = 1) -> np.ndarray:
     new_board = board.copy()
-    new_board[:, RESOURCE_COL] = new_board[:, RESOURCE_COL] + new_board[:, ROBOT_COL]
+    new_board[:, RESOURCE_COL] = (
+        new_board[:, RESOURCE_COL] + times * new_board[:, ROBOT_COL]
+    )
 
     return new_board
 
@@ -35,30 +37,40 @@ def board_from_string(board_string: str) -> np.ndarray:
 @cache
 def recursive_miner(board_string: str, steps: int) -> int:
     board = board_from_string(board_string)
+    assert board.min() >= 0, f"something wrong, board is {board}"
+    assert steps >= 0, "steps negative"
 
     if steps == 0:
         return 0
     else:
-        options = []
-        # just mine
-        new_board = mine(board)
-        options.append(recursive_miner(board_to_string(new_board), steps - 1))
+        options = [0]
 
         # build robot and mine
         for robot in blueprint:
-            if (board + blueprint[robot]).min() >= 0:  # check if affordable
-                # mine
-                new_board = mine(board)
+            # mine until affordable
+            min_resource_needed = -(
+                board[:, RESOURCE_COL] + blueprint[robot][:, RESOURCE_COL]
+            ).min()
+            if steps - min_resource_needed <= 0:
+                continue
+            else:
+                counter = min_resource_needed if (min_resource_needed > 0) else 0
+
+                # mine the resources needed + 1
+                new_board = mine(board, times=counter + 1)
                 # build
                 new_board = new_board + blueprint[robot]
+
                 if robot == "geode":  # future mining of currently built robot
                     options.append(
-                        (steps - 1)
-                        + recursive_miner(board_to_string(new_board), steps - 1)
+                        (steps - 1 - counter)
+                        + recursive_miner(
+                            board_to_string(new_board), steps - 1 - counter
+                        )
                     )
                 else:
                     options.append(
-                        recursive_miner(board_to_string(new_board), steps - 1)
+                        recursive_miner(board_to_string(new_board), steps - 1 - counter)
                     )
 
         return max(options)
