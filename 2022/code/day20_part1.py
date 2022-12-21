@@ -1,17 +1,17 @@
+from tqdm import tqdm
+
 INPUT_FILE = "2022/inputs/day20.txt"
 
 
 def mix_element(my_list: list[int], idx: int, shift: int) -> list[int]:
+    new_list = my_list.copy()
     # rotate element to the front
-    new_list = my_list[idx:] + my_list[:idx]
-    if shift < 0:
-        shift = shift % len(new_list) - 1
-    else:
-        shift = shift % len(new_list)
+    new_list = new_list[idx:] + new_list[:idx]
+    shift = shift % (len(new_list) - 1)
     # slide forward
     new_list = new_list[1 : shift + 1] + [new_list[0]] + new_list[shift + 1 :]
 
-    return new_list[:idx] + new_list[idx:]
+    return new_list
 
 
 if __name__ == "__main__":
@@ -22,7 +22,7 @@ if __name__ == "__main__":
 
     indices = list(range(len(all_inputs)))
 
-    for i in range(len(all_inputs)):
+    for i in tqdm(range(len(all_inputs))):
         idx = indices.index(i)
         shift = all_inputs[idx]
         indices = mix_element(indices, idx, shift)

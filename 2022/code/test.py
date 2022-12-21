@@ -11,6 +11,7 @@ from day13_part1 import compare_packets
 import re
 from day14_part1 import get_line_segment
 from day15_part1 import find_overlap_interval, interval_union_size
+from day20_part1 import mix_element
 
 
 @pytest.fixture()
