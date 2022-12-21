@@ -74,7 +74,7 @@ if __name__ == "__main__":
             nodes.append(node)
 
     digraph = digraph_from_nodes(nodes)
+    print(digraph)
 
     root_value = find_node_value(digraph, "root")
-
     print(root_value)
