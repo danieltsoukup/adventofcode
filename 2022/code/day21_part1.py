@@ -31,8 +31,6 @@ def digraph_from_nodes(nodes: list) -> nx.DiGraph:
         for n in node["neighbors"]:
             digraph.add_edge(n, node["name"])
 
-    # nx.set_node_attributes(digraph, {node["name"]: node["value"] for node in nodes},"value")
-
     return digraph
 
 
