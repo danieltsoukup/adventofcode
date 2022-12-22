@@ -285,3 +285,16 @@ def test_extract_nodes():
     expected = ["XN", "DG", "UJ", "VD", "VI", "OU"]
 
     assert expected == re.findall(r"([A-Z]+\b)+", string_)
+
+
+##############
+### DAY 22 ###
+##############
+
+
+def test_text_split():
+    text = "1R27X"
+    split = re.split(r"(\d+)", text)
+    split = [x for x in split if x]  # omit empty strings
+
+    assert split == ["1", "R", "27", "X"]
