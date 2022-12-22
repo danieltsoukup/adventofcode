@@ -104,7 +104,8 @@ if __name__ == "__main__":
 
     blueprint = blueprints[0]
 
-    print(recursive_miner(board_to_string(starter_board), STEPS))
-
-    # speed-up idea: remove geode count from the board and caching?
-    print(recursive_miner.cache_info())
+    try:
+        print(recursive_miner(board_to_string(starter_board), STEPS))
+    except KeyboardInterrupt:
+        # speed-up idea: remove geode count from the board and caching?
+        print(recursive_miner.cache_info())
