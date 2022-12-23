@@ -2,7 +2,12 @@ import re
 import numpy as np
 from functools import cache
 
-INPUT_FILE = "2022/inputs/day19_test.txt"
+TEST = True
+
+if TEST:
+    INPUT_FILE = "2022/inputs/day19_test.txt"
+else:
+    INPUT_FILE = "2022/inputs/day19.txt"
 
 ORE_ROW = 0
 CLAY_ROW = 1

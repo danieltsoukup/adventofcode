@@ -100,7 +100,7 @@ def read_board():
     return free_board_cells, wall_cells, NUM_LINES, NUM_COLS, path
 
 
-if __name__ == "__main__":
+def build_free_board_graph():
     free_board_cells, wall_cells, NUM_LINES, NUM_COLS, path = read_board()
 
     # form base graphs
@@ -153,6 +153,12 @@ if __name__ == "__main__":
 
     # free board subgraph
     free_board_graph = nx.subgraph(board_graph, free_board_cells)
+
+    return free_board_graph, free_board_cells, path
+
+
+if __name__ == "__main__":
+    free_board_graph, free_board_cells, path = build_free_board_graph()
 
     print("Board without walls", free_board_graph)
 
