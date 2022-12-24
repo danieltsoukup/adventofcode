@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-INPUT_FILE = "2022/inputs/day23.txt"
+INPUT_FILE = "2022/inputs/day23_test.txt"
 
 
 def read_input_elfs(input_path: str) -> set:
@@ -20,15 +20,36 @@ def read_input_elfs(input_path: str) -> set:
 
 
 def check_north_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> bool:
+    """
+    First coord N-S with N pos and S neg
+    Second coord E-W with E positive and W neg
+    """
     moved = set()
-    moved.add((elf[0], elf[1] + 1))
+    moved.add((elf[0] + 1, elf[1]))
     moved.add((elf[0] + 1, elf[1] + 1))
-    moved.add((elf[0] - 1, elf[1] + 1))
+    moved.add((elf[0] + 1, elf[1] - 1))
 
     return len(elfs.intersection(moved)) > 0
 
 
 def check_south_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> bool:
+    """
+    First coord N-S with N pos and S neg
+    Second coord E-W with E positive and W neg
+    """
+    moved = set()
+    moved.add((elf[0] - 1, elf[1]))
+    moved.add((elf[0] - 1, elf[1] + 1))
+    moved.add((elf[0] - 1, elf[1] - 1))
+
+    return len(elfs.intersection(moved)) > 0
+
+
+def check_west_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> bool:
+    """
+    First coord N-S with N pos and S neg
+    Second coord E-W with E positive and W neg
+    """
     moved = set()
     moved.add((elf[0], elf[1] - 1))
     moved.add((elf[0] + 1, elf[1] - 1))
@@ -37,20 +58,15 @@ def check_south_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> boo
     return len(elfs.intersection(moved)) > 0
 
 
-def check_west_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> bool:
-    moved = set()
-    moved.add((elf[0] - 1, elf[1]))
-    moved.add((elf[0] - 1, elf[1] - 1))
-    moved.add((elf[0] - 1, elf[1] + 1))
-
-    return len(elfs.intersection(moved)) > 0
-
-
 def check_east_blocked(elfs: set[tuple[int, int]], elf: tuple[int, int]) -> bool:
+    """
+    First coord N-S with N pos and S neg
+    Second coord E-W with E positive and W neg
+    """
     moved = set()
-    moved.add((elf[0] + 1, elf[1]))
-    moved.add((elf[0] + 1, elf[1] - 1))
+    moved.add((elf[0], elf[1] + 1))
     moved.add((elf[0] + 1, elf[1] + 1))
+    moved.add((elf[0] - 1, elf[1] + 1))
 
     return len(elfs.intersection(moved)) > 0
 
@@ -69,14 +85,18 @@ def is_direction_blocked(
 
 
 def direction_to_location(elf: tuple[int, int], direction: str) -> tuple[int, int]:
+    """
+    First coord N-S with N pos and S neg
+    Second coord E-W with E positive and W neg
+    """
     if direction == "N":
-        return (elf[0], elf[1] + 1)
-    elif direction == "S":
-        return (elf[0], elf[1] - 1)
-    elif direction == "W":
-        return (elf[0] - 1, elf[1])
-    elif direction == "E":
         return (elf[0] + 1, elf[1])
+    elif direction == "S":
+        return (elf[0] - 1, elf[1])
+    elif direction == "W":
+        return (elf[0], elf[1] - 1)
+    elif direction == "E":
+        return (elf[0], elf[1] + 1)
 
 
 def propose_move(
@@ -143,4 +163,4 @@ if __name__ == "__main__":
         elfs = move_elfs(elfs, move_proposal)
         order = update_order(order)
 
-        print(get_rectangle_size(elfs) - len(elfs))
+        print(get_rectangle_size(elfs), len(elfs), get_rectangle_size(elfs) - len(elfs))
