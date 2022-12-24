@@ -19,12 +19,14 @@ ROBOT_COL = 1
 
 
 def setup_empty_array():
-    return np.zeros((4, 2), dtype=np.int16)
+    return np.zeros((3, 2), dtype=np.int16)
 
 
-def mine(board: np.ndarray) -> np.ndarray:
+def mine(board: np.ndarray, times: int = 1) -> np.ndarray:
     new_board = board.copy()
-    new_board[:, RESOURCE_COL] = new_board[:, RESOURCE_COL] + new_board[:, ROBOT_COL]
+    new_board[:, RESOURCE_COL] = (
+        new_board[:, RESOURCE_COL] + times * new_board[:, ROBOT_COL]
+    )
 
     return new_board
 
@@ -34,31 +36,95 @@ def board_to_string(board: np.ndarray) -> str:
 
 
 def board_from_string(board_string: str) -> np.ndarray:
-    return np.array(eval(board_string), dtype=np.int16).reshape(4, 2)
+    return np.array(eval(board_string), dtype=np.int16).reshape(3, 2)
 
 
-@cache
-def recursive_miner(board_string: str, steps: int) -> int:
+def is_affordable(
+    board: np.ndarray,
+    robot_array: np.ndarray,
+) -> bool:
+    # check if affordable
+    difference_after_build = board[:, RESOURCE_COL] + robot_array[:, RESOURCE_COL]
+    enough_resources = difference_after_build.min() >= 0
+
+    needed_for_robot = robot_array[:, RESOURCE_COL] < 0
+    depleted = difference_after_build[needed_for_robot].min() == 0
+
+    return enough_resources, depleted
+
+
+def can_be_mined(board: np.ndarray, robot_array: np.ndarray) -> bool:
+    needed_for_robot = robot_array[:, RESOURCE_COL] < 0
+    mining = board[:, ROBOT_COL] > 0
+
+    return np.all(needed_for_robot <= mining)
+
+
+def mining_steps_needed(board: np.ndarray, robot_array: np.ndarray) -> int:
+    difference = board[:, RESOURCE_COL] + robot_array[:, RESOURCE_COL]
+
+    return -(difference[difference <= 0].min())
+
+
+CACHE = dict()
+
+
+def recursive_geode_miner(board_string: str, steps: int) -> int:
+    # try cache
+    if (board_string, steps) in CACHE:
+        return CACHE[(board_string, steps)]
+
     board = board_from_string(board_string)
 
-    if steps == 0:
-        return board[GEODE_ROW, RESOURCE_COL]
+    assert board.min() >= 0, f"something wrong, board is {board}"
+    assert steps >= 0, "steps negative"
+
+    if steps <= 0:
+        return 0
     else:
-        options = []
-        # just mine
-        new_board = mine(board)
-        options.append(recursive_miner(board_to_string(new_board), steps - 1))
+        options = [0]
 
         # build robot and mine
         for robot in blueprint:
-            if (board + blueprint[robot]).min() >= 0:  # check if affordable
-                # mine
-                new_board = mine(board)
-                # build
-                new_board = new_board + blueprint[robot]
-                options.append(recursive_miner(board_to_string(new_board), steps - 1))
+            robot_array = blueprint[robot]
 
-        return max(options)
+            # pruning the game tree
+            # this purchase can't be optimal if we could have already purchased a step earlier
+            enough_resources, depleted = is_affordable(board, robot_array)
+            if enough_resources and not depleted:
+                continue
+
+            if can_be_mined(board, robot_array):
+                needed_steps = mining_steps_needed(board, robot_array)
+                if steps - needed_steps <= 0:
+                    continue
+                else:
+                    # mine the resources needed + 1
+                    new_board = mine(board, times=needed_steps + 1)
+                    # build
+                    new_board = new_board + robot_array
+
+                    if robot == "geode":
+                        options.append(
+                            (
+                                steps - 1 - needed_steps
+                            )  # future mining of currently built robot
+                            + recursive_geode_miner(
+                                board_to_string(new_board), steps - 1 - needed_steps
+                            )  # mining of robots purchased in the future
+                        )
+                    else:
+                        options.append(
+                            recursive_geode_miner(
+                                board_to_string(new_board), steps - 1 - needed_steps
+                            )
+                        )
+
+        best = max(options)
+
+        CACHE[(board_string, steps)] = best
+
+        return best
 
 
 if __name__ == "__main__":
@@ -86,7 +152,7 @@ if __name__ == "__main__":
             obs_array[CLAY_ROW, RESOURCE_COL] = -1 * int(clay_cost)
 
             geode_array = setup_empty_array()
-            geode_array[GEODE_ROW, ROBOT_COL] = 1
+            # geode_array[GEODE_ROW, ROBOT_COL] = 1
             ore_cost, obs_cost = re.findall(
                 r"geode robot costs (\d+) ore and (\d+) obsidian", line
             )[0]
@@ -102,14 +168,29 @@ if __name__ == "__main__":
                 }
             )
 
-    starter_board = np.zeros((4, 2), dtype=np.int16)
+    starter_board = setup_empty_array()
     starter_board[ORE_ROW, ROBOT_COL] = 1
 
-    STEPS = 19
+    # Min 22
+    # 1 ore-collecting robot collects 1 ore; you now have 4 ore.
+    # 4 clay-collecting robots collect 4 clay; you now have 33 clay.
+    # 2 obsidian-collecting robots collect 2 obsidian; you now have 4 obsidian.
+    # 2 geode-cracking robots crack 2 geodes; you now have 5 open geodes.
+
+    starter_board[ORE_ROW, ROBOT_COL] = 1
+    starter_board[CLAY_ROW, ROBOT_COL] = 4
+    starter_board[OBS_ROW, ROBOT_COL] = 2
+    starter_board[ORE_ROW, RESOURCE_COL] = 4
+    starter_board[CLAY_ROW, RESOURCE_COL] = 25
+    starter_board[OBS_ROW, RESOURCE_COL] = 7
+
+    STEPS = 4
 
     blueprint = blueprints[0]
+    print(blueprint)
 
-    print(recursive_miner(board_to_string(starter_board), STEPS))
-
-    # speed-up idea: remove geode count from the board and caching?
-    print(recursive_miner.cache_info())
+    try:
+        print(recursive_geode_miner(board_to_string(starter_board), STEPS))
+    except KeyboardInterrupt:
+        # speed-up idea: remove geode count from the board and caching?
+        print(recursive_geode_miner.cache_info())
