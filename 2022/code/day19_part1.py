@@ -57,21 +57,15 @@ def can_be_mined(board: np.ndarray, robot_array: np.ndarray) -> bool:
 
 def mining_steps_needed(board: np.ndarray, robot_array: np.ndarray) -> int:
     difference = board[:, RESOURCE_COL] + robot_array[:, RESOURCE_COL]
-    # assert (difference < 0).sum() > 0, "No need to mine."
-    if (difference < 0).sum() == 0:
-        return 0
-    else:
-        return -(difference[difference < 0].min())
 
-
-def evaluate_future(board: np.ndarray, steps: int) -> int:
-    pass
+    return -(difference[difference <= 0].min())
 
 
 CACHE = dict()
 
 
-def recursive_miner(board_string: str, steps: int) -> int:
+def recursive_geode_miner(board_string: str, steps: int) -> int:
+    # try cache
     if (board_string, steps) in CACHE:
         return CACHE[(board_string, steps)]
 
@@ -80,7 +74,7 @@ def recursive_miner(board_string: str, steps: int) -> int:
     assert board.min() >= 0, f"something wrong, board is {board}"
     assert steps >= 0, "steps negative"
 
-    if steps == 0:
+    if steps <= 0:
         return 0
     else:
         options = [0]
@@ -88,8 +82,10 @@ def recursive_miner(board_string: str, steps: int) -> int:
         # build robot and mine
         for robot in blueprint:
             robot_array = blueprint[robot]
-            enough_resources, depleted = is_affordable(board, robot_array)
 
+            # pruning the game tree
+            # this purchase can't be optimal if we could have already purchased a step earlier
+            enough_resources, depleted = is_affordable(board, robot_array)
             if enough_resources and not depleted:
                 continue
 
@@ -103,22 +99,21 @@ def recursive_miner(board_string: str, steps: int) -> int:
                     # build
                     new_board = new_board + robot_array
 
-                    if robot == "geode":  # future mining of currently built robot
+                    if robot == "geode":
                         options.append(
-                            (steps - 1 - needed_steps)
-                            + recursive_miner(
+                            (
+                                steps - 1 - needed_steps
+                            )  # future mining of currently built robot
+                            + recursive_geode_miner(
                                 board_to_string(new_board), steps - 1 - needed_steps
-                            )
+                            )  # mining of robots purchased in the future
                         )
                     else:
                         options.append(
-                            recursive_miner(
+                            recursive_geode_miner(
                                 board_to_string(new_board), steps - 1 - needed_steps
                             )
                         )
-
-            else:
-                continue
 
         best = max(options)
 
@@ -171,12 +166,26 @@ if __name__ == "__main__":
     starter_board = setup_empty_array()
     starter_board[ORE_ROW, ROBOT_COL] = 1
 
-    STEPS = 20
+    # Min 22
+    # 1 ore-collecting robot collects 1 ore; you now have 4 ore.
+    # 4 clay-collecting robots collect 4 clay; you now have 33 clay.
+    # 2 obsidian-collecting robots collect 2 obsidian; you now have 4 obsidian.
+    # 2 geode-cracking robots crack 2 geodes; you now have 5 open geodes.
+
+    starter_board[ORE_ROW, ROBOT_COL] = 1
+    starter_board[CLAY_ROW, ROBOT_COL] = 4
+    starter_board[OBS_ROW, ROBOT_COL] = 2
+    starter_board[ORE_ROW, RESOURCE_COL] = 4
+    starter_board[CLAY_ROW, RESOURCE_COL] = 25
+    starter_board[OBS_ROW, RESOURCE_COL] = 7
+
+    STEPS = 4
 
     blueprint = blueprints[0]
+    print(blueprint)
 
     try:
-        print(recursive_miner(board_to_string(starter_board), STEPS))
+        print(recursive_geode_miner(board_to_string(starter_board), STEPS))
     except KeyboardInterrupt:
         # speed-up idea: remove geode count from the board and caching?
-        print(recursive_miner.cache_info())
+        print(recursive_geode_miner.cache_info())
