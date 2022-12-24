@@ -1,6 +1,6 @@
 from collections import defaultdict
 
-INPUT_FILE = "2022/inputs/day23_test.txt"
+INPUT_FILE = "2022/inputs/day23.txt"
 
 
 def read_input_elfs(input_path: str) -> set:
@@ -104,13 +104,24 @@ def propose_move(
 ) -> dict[tuple[int, int], tuple[int, int]]:
     proposal = dict()
     for elf in elfs:
-        proposal[elf] = elf  # default is to stay put
-        for direction in order:
-            if is_direction_blocked(elfs, elf, direction):
-                continue  # check next dir
-            else:
-                proposal[elf] = direction_to_location(elf, direction)
-                break  # go to next elf
+        proposal[elf] = None
+        look_around = [
+            (direction, is_direction_blocked(elfs, elf, direction))
+            for direction in order
+        ]
+        if any(
+            [is_blocked for _, is_blocked in look_around]
+        ):  # if there is someone in the neighborhood, try moving
+            for direction, is_blocked in look_around:
+                if not is_blocked:
+                    proposal[elf] = direction_to_location(elf, direction)
+                    break  # go to next elf
+
+            if proposal[elf] is None:  # all directions blocked
+                proposal[elf] = elf
+
+        else:
+            proposal[elf] = elf  # stay put if no other elf around
 
     return proposal
 
@@ -163,4 +174,4 @@ if __name__ == "__main__":
         elfs = move_elfs(elfs, move_proposal)
         order = update_order(order)
 
-        print(get_rectangle_size(elfs), len(elfs), get_rectangle_size(elfs) - len(elfs))
+    print(get_rectangle_size(elfs) - len(elfs))
