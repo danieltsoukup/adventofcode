@@ -1,32 +1,7 @@
 import re
 import numpy as np
-import atexit
-import pickle
 from functools import cache
 from datetime import datetime
-
-
-def persist_cache_to_disk(filename):
-    """
-    From https://gist.github.com/tohyongcheng/94ca536b0a5c96c9751b82150f20c95a
-    """
-
-    def decorator(original_func):
-        try:
-            cache = pickle.load(open(filename, "rb"))
-        except (IOError, ValueError):
-            cache = {}
-
-        atexit.register(lambda: pickle.dump(cache, open(filename, "wb")))
-
-        def new_func(*args):
-            if tuple(args) not in cache:
-                cache[tuple(args)] = original_func(*args)
-            return cache[args]
-
-        return new_func
-
-    return decorator
 
 
 TEST = False
