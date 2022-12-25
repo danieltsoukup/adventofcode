@@ -1,8 +1,35 @@
 import re
 import numpy as np
+import atexit
+import pickle
 from functools import cache
+from datetime import datetime
 
-TEST = True
+
+def persist_cache_to_disk(filename):
+    """
+    From https://gist.github.com/tohyongcheng/94ca536b0a5c96c9751b82150f20c95a
+    """
+
+    def decorator(original_func):
+        try:
+            cache = pickle.load(open(filename, "rb"))
+        except (IOError, ValueError):
+            cache = {}
+
+        atexit.register(lambda: pickle.dump(cache, open(filename, "wb")))
+
+        def new_func(*args):
+            if tuple(args) not in cache:
+                cache[tuple(args)] = original_func(*args)
+            return cache[args]
+
+        return new_func
+
+    return decorator
+
+
+TEST = False
 
 if TEST:
     INPUT_FILE = "2022/inputs/day19_test.txt"
@@ -12,7 +39,6 @@ else:
 ORE_ROW = 0
 CLAY_ROW = 1
 OBS_ROW = 2
-GEODE_ROW = 3
 
 RESOURCE_COL = 0
 ROBOT_COL = 1
@@ -22,11 +48,52 @@ def setup_empty_array():
     return np.zeros((3, 2), dtype=np.int16)
 
 
-def mine(board: np.ndarray, times: int = 1) -> np.ndarray:
+def read_blueprint(line: str) -> dict[str : np.ndarray]:
+    ore_array = setup_empty_array()
+    ore_array[ORE_ROW, ROBOT_COL] = 1
+    cost = re.findall(r"ore robot costs (\d+) ore", line)[0]
+    ore_array[ORE_ROW, RESOURCE_COL] = -1 * int(cost)
+
+    clay_array = setup_empty_array()
+    clay_array[CLAY_ROW, ROBOT_COL] = 1
+    cost = re.findall(r"clay robot costs (\d+) ore", line)[0]
+    clay_array[ORE_ROW, RESOURCE_COL] = -1 * int(cost)
+
+    obs_array = setup_empty_array()
+    obs_array[OBS_ROW, ROBOT_COL] = 1
+    ore_cost, clay_cost = re.findall(
+        r"obsidian robot costs (\d+) ore and (\d+) clay", line
+    )[0]
+    obs_array[ORE_ROW, RESOURCE_COL] = -1 * int(ore_cost)
+    obs_array[CLAY_ROW, RESOURCE_COL] = -1 * int(clay_cost)
+
+    geode_array = setup_empty_array()
+    ore_cost, obs_cost = re.findall(
+        r"geode robot costs (\d+) ore and (\d+) obsidian", line
+    )[0]
+    geode_array[ORE_ROW, RESOURCE_COL] = -1 * int(ore_cost)
+    geode_array[OBS_ROW, RESOURCE_COL] = -1 * int(obs_cost)
+
+    blueprint = {
+        "ore": ore_array,
+        "clay": clay_array,
+        "obs": obs_array,
+        "geode": geode_array,
+    }
+
+    return blueprint
+
+
+def could_be_mined(board: np.ndarray, robot_array: np.ndarray) -> bool:
+    needed_resources = robot_array[:, RESOURCE_COL] < 0
+    available_miners = board[:, ROBOT_COL] > 0
+
+    return np.all(available_miners[needed_resources])
+
+
+def mine(board: np.ndarray) -> np.ndarray:
     new_board = board.copy()
-    new_board[:, RESOURCE_COL] = (
-        new_board[:, RESOURCE_COL] + times * new_board[:, ROBOT_COL]
-    )
+    new_board[:, RESOURCE_COL] += new_board[:, ROBOT_COL]
 
     return new_board
 
@@ -39,158 +106,79 @@ def board_from_string(board_string: str) -> np.ndarray:
     return np.array(eval(board_string), dtype=np.int16).reshape(3, 2)
 
 
-def is_affordable(
-    board: np.ndarray,
-    robot_array: np.ndarray,
-) -> bool:
-    # check if affordable
-    difference_after_build = board[:, RESOURCE_COL] + robot_array[:, RESOURCE_COL]
-    enough_resources = difference_after_build.min() >= 0
-
-    needed_for_robot = robot_array[:, RESOURCE_COL] < 0
-    depleted = difference_after_build[needed_for_robot].min() == 0
-
-    return enough_resources, depleted
-
-
-def can_be_mined(board: np.ndarray, robot_array: np.ndarray) -> bool:
-    needed_for_robot = robot_array[:, RESOURCE_COL] < 0
-    mining = board[:, ROBOT_COL] > 0
-
-    return np.all(needed_for_robot <= mining)
-
-
-def mining_steps_needed(board: np.ndarray, robot_array: np.ndarray) -> int:
-    difference = board[:, RESOURCE_COL] + robot_array[:, RESOURCE_COL]
-
-    return -(difference[difference <= 0].min())
-
-
-CACHE = dict()
-
-
-def recursive_geode_miner(board_string: str, steps: int) -> int:
-    # try cache
-    if (board_string, steps) in CACHE:
-        return CACHE[(board_string, steps)]
-
+@cache
+def recursive_optimizer(board_string: str, steps: int):
     board = board_from_string(board_string)
+    # sanity check - can be removed at the end
+    # assert board.min() >= 0 and steps >= 0
 
-    assert board.min() >= 0, f"something wrong, board is {board}"
-    assert steps >= 0, "steps negative"
-
-    if steps <= 0:
+    # can't build and mine with new robots in <= 1 steps
+    if steps <= 1:
         return 0
+
     else:
-        options = [0]
+        optimal = [0]
 
-        # build robot and mine
-        for robot in blueprint:
-            robot_array = blueprint[robot]
+        for robot, robot_array in blueprint.items():
+            # check if we can afford it by further mining so that at least 1 step remains
+            if could_be_mined(board, robot_array):
+                mining_steps = 0
+                new_board = board.copy()
+                # mine until affordable
+                while (new_board + robot_array).min() < 0:
+                    new_board = mine(new_board)
+                    mining_steps += 1
 
-            # pruning the game tree
-            # this purchase can't be optimal if we could have already purchased a step earlier
-            enough_resources, depleted = is_affordable(board, robot_array)
-            if enough_resources and not depleted:
-                continue
+                remaining_steps = steps - mining_steps
+                # did we ran out of time?
+                # need one step to actually build the robot and then another to use it later
+                if remaining_steps > 1:
+                    # buy & mine in another step
+                    new_board = mine(new_board)
+                    new_board += robot_array
+                    remaining_steps -= 1
 
-            if can_be_mined(board, robot_array):
-                needed_steps = mining_steps_needed(board, robot_array)
-                if steps - needed_steps <= 0:
-                    continue
-                else:
-                    # mine the resources needed + 1
-                    new_board = mine(board, times=needed_steps + 1)
-                    # build
-                    new_board = new_board + robot_array
-
+                    new_board_string = board_to_string(new_board)
+                    # if the robot was a geode, add the remaining steps to the recursive output
                     if robot == "geode":
-                        options.append(
-                            (
-                                steps - 1 - needed_steps
-                            )  # future mining of currently built robot
-                            + recursive_geode_miner(
-                                board_to_string(new_board), steps - 1 - needed_steps
-                            )  # mining of robots purchased in the future
+                        optimal.append(
+                            remaining_steps
+                            + recursive_optimizer(new_board_string, remaining_steps)
                         )
                     else:
-                        options.append(
-                            recursive_geode_miner(
-                                board_to_string(new_board), steps - 1 - needed_steps
-                            )
+                        optimal.append(
+                            recursive_optimizer(new_board_string, remaining_steps)
                         )
+                else:  # at most one step remained after mining - no new robots will mine after purchase
+                    continue
+            else:
+                continue
 
-        best = max(options)
-
-        CACHE[(board_string, steps)] = best
-
-        return best
+        return max(optimal)
 
 
 if __name__ == "__main__":
     blueprints = []
     with open(INPUT_FILE, "r") as file:
         for line in file:
-            line = line.strip()
-
-            ore_array = setup_empty_array()
-            ore_array[ORE_ROW, ROBOT_COL] = 1
-            cost = re.findall(r"ore robot costs (\d+) ore", line)[0]
-            ore_array[ORE_ROW, RESOURCE_COL] = -1 * int(cost)
-
-            clay_array = setup_empty_array()
-            clay_array[CLAY_ROW, ROBOT_COL] = 1
-            cost = re.findall(r"clay robot costs (\d+) ore", line)[0]
-            clay_array[ORE_ROW, RESOURCE_COL] = -1 * int(cost)
-
-            obs_array = setup_empty_array()
-            obs_array[OBS_ROW, ROBOT_COL] = 1
-            ore_cost, clay_cost = re.findall(
-                r"obsidian robot costs (\d+) ore and (\d+) clay", line
-            )[0]
-            obs_array[ORE_ROW, RESOURCE_COL] = -1 * int(ore_cost)
-            obs_array[CLAY_ROW, RESOURCE_COL] = -1 * int(clay_cost)
-
-            geode_array = setup_empty_array()
-            # geode_array[GEODE_ROW, ROBOT_COL] = 1
-            ore_cost, obs_cost = re.findall(
-                r"geode robot costs (\d+) ore and (\d+) obsidian", line
-            )[0]
-            geode_array[ORE_ROW, RESOURCE_COL] = -1 * int(ore_cost)
-            geode_array[OBS_ROW, RESOURCE_COL] = -1 * int(obs_cost)
-
-            blueprints.append(
-                {
-                    "ore": ore_array,
-                    "clay": clay_array,
-                    "obs": obs_array,
-                    "geode": geode_array,
-                }
-            )
+            blueprints.append(read_blueprint(line))
 
     starter_board = setup_empty_array()
     starter_board[ORE_ROW, ROBOT_COL] = 1
+    starter_board_string = board_to_string(starter_board)
 
-    # Min 22
-    # 1 ore-collecting robot collects 1 ore; you now have 4 ore.
-    # 4 clay-collecting robots collect 4 clay; you now have 33 clay.
-    # 2 obsidian-collecting robots collect 2 obsidian; you now have 4 obsidian.
-    # 2 geode-cracking robots crack 2 geodes; you now have 5 open geodes.
+    steps = 24
+    optimal_geodes = []
+    for i in range(len(blueprints)):
+        print(f"Working on blueprint {i+1}...")
+        start = datetime.now()
+        blueprint = blueprints[i]
+        optimal = recursive_optimizer(starter_board_string, steps)
+        optimal_geodes.append(optimal)
+        print("--- Optimal:", optimal)
+        print("--- Runtime:", datetime.now() - start)
+        print(recursive_optimizer.cache_info())
 
-    starter_board[ORE_ROW, ROBOT_COL] = 1
-    starter_board[CLAY_ROW, ROBOT_COL] = 4
-    starter_board[OBS_ROW, ROBOT_COL] = 2
-    starter_board[ORE_ROW, RESOURCE_COL] = 4
-    starter_board[CLAY_ROW, RESOURCE_COL] = 25
-    starter_board[OBS_ROW, RESOURCE_COL] = 7
+        recursive_optimizer.cache_clear()
 
-    STEPS = 4
-
-    blueprint = blueprints[0]
-    print(blueprint)
-
-    try:
-        print(recursive_geode_miner(board_to_string(starter_board), STEPS))
-    except KeyboardInterrupt:
-        # speed-up idea: remove geode count from the board and caching?
-        print(recursive_geode_miner.cache_info())
+    print(sum([(i + 1) * opt for i, opt in enumerate(optimal_geodes)]))
