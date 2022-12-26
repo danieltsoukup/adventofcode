@@ -11,7 +11,7 @@ from day13_part1 import compare_packets
 import re
 from day14_part1 import get_line_segment
 from day15_part1 import find_overlap_interval, interval_union_size
-from day20_part1 import mix_element
+from day25_part1 import recursive_snafu_add
 
 
 @pytest.fixture()
@@ -298,3 +298,24 @@ def test_text_split():
     split = [x for x in split if x]  # omit empty strings
 
     assert split == ["1", "R", "27", "X"]
+
+
+##############
+### DAY 25 ###
+##############
+
+
+add_testing = [
+    (["0"], ["1"], "0", ["1"]),
+    (["1"], ["0"], "0", ["1"]),
+    (["2"], ["0"], "0", ["2"]),
+    (["1"], ["0"], "1", ["2"]),
+    (["2"], ["1"], "0", ["1", "="]),
+    (["1", "1"], ["1", "2"], "0", ["1", "=", "="]),
+]
+
+
+@pytest.mark.parametrize("list1,list2,carry_over,expected", add_testing)
+def test_recursive_adding(list1, list2, carry_over, expected):
+
+    assert recursive_snafu_add(list1, list2, carry_over) == expected
