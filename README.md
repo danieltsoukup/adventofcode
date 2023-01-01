@@ -2,6 +2,7 @@
 
 Coding challenges solved for [Advent of Code](https://adventofcode.com).
 
+- [AoC 2022](2022): 49/50 solved.
 
 ### Setup
 
