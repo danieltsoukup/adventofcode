@@ -2,6 +2,10 @@ import re
 import numpy as np
 from datetime import datetime
 
+# Some pruning ideas from
+# https://www.reddit.com/r/adventofcode/comments/zpihwi/2022_day_19_solutions/
+
+
 TEST = False
 
 if TEST:

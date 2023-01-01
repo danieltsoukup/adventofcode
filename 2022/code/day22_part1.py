@@ -1,6 +1,4 @@
-from collections import defaultdict
 import re
-from enum import Enum
 import networkx as nx
 
 VERBOSE = False

@@ -1,4 +1,7 @@
-# [Advent of Code](https://adventofcode.com)
+# Advent of Code
+
+Coding challenges solved for [Advent of Code](https://adventofcode.com).
+
 
 ### Setup
 
