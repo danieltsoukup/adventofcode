@@ -12,6 +12,7 @@ import re
 from day14_part1 import get_line_segment
 from day15_part1 import find_overlap_interval, interval_union_size
 from day25_part1 import recursive_snafu_add
+import networkx as nx
 
 
 @pytest.fixture()
@@ -319,3 +320,15 @@ add_testing = [
 def test_recursive_adding(list1, list2, carry_over, expected):
 
     assert recursive_snafu_add(list1, list2, carry_over) == expected
+
+
+def test_edge_mapping():
+    graph = nx.Graph()
+    graph.add_edges_from([(0, 1), (1, 2)])
+    nx.set_edge_attributes(graph, values=lambda x: x, name="mapper")
+
+    subgraph = graph.subgraph([0, 1])
+
+    func = subgraph.edges[0, 1]["mapper"]
+
+    assert func("x") == "x"
