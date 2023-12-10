@@ -1,4 +1,10 @@
 
+import re
+import math
+import logging
+
+logger = logging.Logger("logger", level=logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 if __name__ == "__main__":
     total = 0
@@ -7,4 +13,4 @@ if __name__ == "__main__":
             line = line.strip()
             pass
 
-    print(total)
+    logger.info(total)
