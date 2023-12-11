@@ -13,4 +13,4 @@ if __name__ == "__main__":
             line = line.strip()
             pass
 
-    logger.info(total)
+    logger.info(f"Result {total}")
