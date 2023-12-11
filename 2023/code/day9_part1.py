@@ -107,11 +107,13 @@ if __name__ == "__main__":
         last_values = [
             diffed_list[-1]
         ]  # could just add the last values from the diffed lists to total
+        diff_count = 0
         while len(set(diffed_list)) > 1:
             diffed_list = diff_sequence(diffed_list)
             last_values.append(diffed_list[-1])
+            diff_count += 1
 
-        logger.debug(diffed_list)
+        logger.debug(f"Diff count: {diff_count} \t last values {last_values[:5]}")
 
         total += sum(last_values)
 
