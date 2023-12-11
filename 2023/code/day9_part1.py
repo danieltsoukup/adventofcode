@@ -93,7 +93,9 @@ if __name__ == "__main__":
     with open(INPUT_FILE, "r") as file:
         for line in file:
             line = line.strip()
-            rows.append([int(num) for num in re.findall("[0-9]+", line)])
+            rows.append([int(num) for num in re.findall("-?[0-9]+", line)])
+
+    assert rows[1][0] == -4
 
     def diff_sequence(num_list: list[int]) -> list[int]:
         return [next - previous for previous, next in zip(num_list[:-1], num_list[1:])]
