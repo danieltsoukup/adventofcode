@@ -3,6 +3,7 @@
 SESSIONID=`cat sessionid`
 
 # create files for the day
+# use as `make files year=2023 day=2`
 files: inputs
 	mkdir -p "$(year)/code"
 	echo "INPUT_FILE='$(year)/inputs/day$(day).txt'" > "$(year)/code/day$(day)_part1.py"

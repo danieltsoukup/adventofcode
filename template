@@ -1,4 +1,12 @@
 
+import re
+import math
+import logging
+import time
+start_time = time.time()
+
+logger = logging.Logger("logger", level=logging.INFO)
+logger.addHandler(logging.StreamHandler())
 
 if __name__ == "__main__":
     total = 0
@@ -7,4 +15,7 @@ if __name__ == "__main__":
             line = line.strip()
             pass
 
-    print(total)
+    logger.info(f">> Result {total}")
+    
+    end_time = time.time()
+    logger.info(f">> Elapsed time: {round(end_time - start_time, 2)} sec.")
