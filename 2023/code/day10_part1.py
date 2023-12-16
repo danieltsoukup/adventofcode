@@ -133,7 +133,7 @@ code_to_delta = {
     "J": [N, W],
     "7": [S, W],
     "F": [S, E],
-    "S": [],
+    "S": [S, E, W, N],
 }
 
 opposite = {"N": "S", "S": "N", "E": "W", "W": "E"}
@@ -149,7 +149,7 @@ opposite = {"N": "S", "S": "N", "E": "W", "W": "E"}
 
 if __name__ == "__main__":
     total = 0
-    graph = nx.Graph()
+    digraph = nx.DiGraph()
     row, col = 0, 0
     start_node = None
     node_list = []
@@ -159,19 +159,30 @@ if __name__ == "__main__":
             col = 0
             for char in line:
                 from_node = (row, col)
+                # add edges
                 if char in code_to_delta:
                     node_list.append(from_node)
                     for delta in code_to_delta[char]:
                         to_node = (from_node[0] + delta[0], from_node[1] + delta[1])
-                        graph.add_edge(from_node, to_node, code=char)
+                        digraph.add_edge(from_node, to_node, code=char)
                     if char == "S":
                         start_node = from_node
 
                 col += 1
             row += 1
 
-    graph = graph.subgraph(node_list)
+    digraph = digraph.subgraph(node_list)
+    logger.info(f">> DiGraph on {len(digraph)} nodes and {len(digraph.edges())} edges.")
+    graph = nx.Graph()
+    graph.add_nodes_from(digraph.nodes())
+    for u, v in digraph.edges():
+        if (v, u) in digraph.edges():
+            graph.add_edge(u, v)
+
+    logger.debug(graph.edges())
+
     logger.info(f">> Graph on {len(graph)} nodes and {len(graph.edges())} edges.")
+
     logger.info(f"Start node degree: {nx.degree(graph, start_node)}")
 
     # BFS from S node and mark distance from S
@@ -188,30 +199,33 @@ if __name__ == "__main__":
             graph.nodes[node]["distance"] = math.inf
 
     def find_furthest_cycle_distance(
-        graph: nx.Graph, nodes: list[tuple[int, int]]
+        graph: nx.Graph, start_node: tuple[int, int]
     ) -> int:
-        node = nodes.pop(0)  # fifo
-        graph.nodes[node]["seen"] = True
-        distance = graph.nodes[node]["distance"]
-
-        for neighbor in nx.neighbors(graph, node):
-            if (
-                (graph.nodes[neighbor]["distance"] <= distance)
-                and (graph.nodes[neighbor]["seen"] is True)
-                and (neighbor != graph.nodes[node]["parent"])
-            ):
-                logger.debug(node)
-                return distance
-            else:
+        graph.nodes[start_node]["seen"] = True
+        queue = [start_node]
+        while queue:
+            # take next node in the FIFO queue
+            current_node = queue.pop(0)
+            for neighbor in nx.neighbors(graph, current_node):
                 if graph.nodes[neighbor]["seen"] is False:
-                    graph.nodes[neighbor]["distance"] = 1 + distance
-                    graph.nodes[neighbor]["parent"] = node
-                    nodes.append(neighbor)
+                    # discovered a new node
+                    graph.nodes[neighbor]["seen"] = True
+                    graph.nodes[neighbor]["parent"] = current_node
+                    graph.nodes[neighbor]["distance"] = (
+                        1 + graph.nodes[current_node]["distance"]
+                    )
+                    queue.append(neighbor)
 
-        return find_furthest_cycle_distance(graph, nodes)
+                # if the neighbor was already seen and closer to the start along a different branch
+                # then we found the circle
+                elif (neighbor != graph.nodes[current_node]["parent"]) and (
+                    graph.nodes[neighbor]["distance"]
+                    <= graph.nodes[current_node]["distance"]
+                ):
+                    return graph.nodes[current_node]["distance"]
 
-    total = len(nx.find_cycle(graph, start_node))
-    # total = find_furthest_cycle_distance(graph, [start_node])
+    # total = len(nx.find_cycle(graph, start_node))/2
+    total = find_furthest_cycle_distance(graph, start_node)
 
     logger.info(f">> Result {total}")
 
