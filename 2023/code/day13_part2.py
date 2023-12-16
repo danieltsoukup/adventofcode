@@ -74,7 +74,7 @@ INPUT_FILE = "2023/inputs/day13.txt"
 
 start_time = time.time()
 
-logger = logging.Logger("logger", level=logging.DEBUG)
+logger = logging.Logger("logger", level=logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
@@ -98,41 +98,48 @@ def transpose_block(block: list[str]) -> list[str]:
     return new_block
 
 
-def find_symmetry_and_type(new_block: list[int]) -> tuple[int, str]:
+def find_symmetry_and_type(new_block: list[int]) -> list[tuple[int, str]]:
     # column symmetry
     column_indices = [
         idx for idx in range(1, len(new_block[0])) if col_symmetry(new_block, idx)
     ]
-    if column_indices:
-        result = column_indices.pop()
-        tuple_ = (result, "col")
-    else:
-        # row symmetry
-        new_block = transpose_block(new_block)
-        column_indices = [
-            idx for idx in range(1, len(new_block[0])) if col_symmetry(new_block, idx)
-        ]
-        if column_indices:
-            result = column_indices.pop()
-            tuple_ = (result, "row")
-        else:
-            tuple_ = None
+    results = [(idx, "col") for idx in column_indices]
+    # row symmetry
+    new_block = transpose_block(new_block)
+    column_indices = [
+        idx for idx in range(1, len(new_block[0])) if col_symmetry(new_block, idx)
+    ]
+    results += [(idx, "row") for idx in column_indices]
 
-    return tuple_
+    return results
+
+
+def replace_char(block: list[str], row: int, col: int) -> list[int]:
+    line = block[row]
+    char = line[col]
+    new_char = {".": "#", "#": "."}[char]
+    new_line = line[:col] + new_char + line[col + 1 :]
+    new_block = block[:row] + [new_line] + block[row + 1 :]
+
+    return new_block
+
+
+assert replace_char([".#", "#."], 0, 0) == ["##", "#."]
+assert replace_char([".#", "#."], 1, 1) == [".#", "##"]
+assert replace_char([".#", "##"], 1, 1) == [".#", "#."]
 
 
 def replace_and_find(block: list[str], orig_result: tuple[int, str]) -> tuple[int, str]:
     for row in range(len(block)):
-        line = block[row]
-        for idx in range(len(line)):
-            char = line[idx]
-            replacement = {".": "#", "#": "."}[char]
-            new_line = line[:idx] + replacement + line[idx + 1 :]
-            new_block = block[:row] + [new_line] + block[row + 1 :]
-
-            tuple_ = find_symmetry_and_type(new_block)
-            if tuple_ and tuple_ != orig_result:
-                return tuple_
+        for col in range(len(block[row])):
+            new_block = replace_char(block, row, col)
+            results = find_symmetry_and_type(new_block)
+            logger.debug(f"{row}, {col} -- {results}")
+            if orig_result in results:
+                results.remove(orig_result)
+                logger.debug(f"{row}, {col} -- {results}")
+            if results:
+                return results.pop()
 
 
 if __name__ == "__main__":
@@ -147,9 +154,11 @@ if __name__ == "__main__":
                 new_block.append(line)
             else:
                 orig_result = find_symmetry_and_type(new_block)
-                new_result = replace_and_find(new_block, orig_result)
+                new_result = replace_and_find(new_block, orig_result[0])
                 total.append(new_result)
-                logger.debug(f"Symmetry: {new_result}")
+                logger.debug(
+                    f"Orig Symmetry: {orig_result}, New Symmetry: {new_result}"
+                )
 
                 new_block = []
 
