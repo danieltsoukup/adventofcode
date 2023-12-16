@@ -2,7 +2,7 @@ import re
 import networkx as nx
 from functools import cache
 
-INPUT_FILE = "2022/inputs/day16.txt"
+INPUT_FILE = "2022/inputs/day16_test.txt"
 
 
 @cache
