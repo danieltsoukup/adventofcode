@@ -2,6 +2,8 @@ import re
 import math
 import logging
 import time
+from functools import lru_cache
+
 
 INPUT_FILE = "2023/inputs/day12.txt"
 
@@ -84,7 +86,7 @@ For each row, count all of the different arrangements of operational and broken 
 
 """
 
-logger = logging.Logger("logger", level=logging.DEBUG)
+logger = logging.Logger("logger", level=logging.INFO)
 logger.addHandler(logging.StreamHandler())
 
 
@@ -100,7 +102,11 @@ assert get_integer_encoding("###..##.#") == (3, 2, 1)
 assert get_integer_encoding("###...") == (3,)
 
 
+@lru_cache()
 def recursive_solve(string_code: str, counts: tuple[int]) -> int:
+    """
+    Naive recursive, full-binary search. Time O(2^{num of ?s}).
+    """
     if "?" not in string_code:
         return int(get_integer_encoding(string_code) == counts)
     else:
